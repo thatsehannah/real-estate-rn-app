@@ -11,7 +11,7 @@ export default function Index() {
         gap: 20,
       }}
     >
-      <Text className='font-bold text-lg my-10 text-blue-400'>
+      <Text className='font-bold my-10 text-blue-400 font-rubik text-3xl'>
         Welcome to ReState
       </Text>
       <Link href={"/sign-in"}>Sign In</Link>
