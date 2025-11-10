@@ -1,6 +1,12 @@
 import { createURL } from "expo-linking";
 import { openAuthSessionAsync } from "expo-web-browser";
-import { Account, Avatars, Client, OAuthProvider } from "react-native-appwrite";
+import {
+  Account,
+  Avatars,
+  Client,
+  OAuthProvider,
+  TablesDB,
+} from "react-native-appwrite";
 
 //reference: https://appwrite.io/docs/products/auth/oauth2
 
@@ -8,6 +14,11 @@ export const config = {
   platform: "com.thatsehannah.restate",
   endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT,
   projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID,
+  databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID,
+  galleriesTableId: process.env.EXPO_PUBLIC_APPWRITE_GALLERIES_TABLE_ID,
+  reviewsTableId: process.env.EXPO_PUBLIC_APPWRITE_REVIEWS_TABLE_ID,
+  agentsTableId: process.env.EXPO_PUBLIC_APPWRITE_AGENTS_TABLE_ID,
+  propertiesTableId: process.env.EXPO_PUBLIC_APPWRITE_PROPERTIES_TABLE_ID,
 };
 
 export const client = new Client()
@@ -18,6 +29,7 @@ export const client = new Client()
 //defining functions used from Appwrite
 export const avatar = new Avatars(client);
 export const account = new Account(client);
+export const tables = new TablesDB(client);
 
 export const login = async () => {
   try {
