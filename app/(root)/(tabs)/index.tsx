@@ -2,12 +2,47 @@ import { Card, FeaturedCard } from "@/components/Cards";
 import Filters from "@/components/Filters";
 import Search from "@/components/Search";
 import icons from "@/constants/icons";
+import { getFeaturedProperties, getProperties } from "@/lib/appwrite";
 import { useGlobalContext } from "@/lib/global-provider";
+import { Property } from "@/lib/models";
+import { useAppwrite } from "@/lib/useAppwrite";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect } from "react";
 import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const { user } = useGlobalContext();
+  const params = useLocalSearchParams<{ query?: string; filter?: string }>();
+
+  const { data: featuredProperties, loading: featuredPropertiesLoading } =
+    useAppwrite({
+      fn: getFeaturedProperties,
+    });
+
+  const {
+    data: properties,
+    loading: propertiesLoading,
+    refetch,
+  } = useAppwrite({
+    fn: getProperties,
+    params: {
+      filter: params.filter!,
+      query: params.query!,
+      limit: 6,
+    },
+    skip: true,
+  });
+
+  const handleCardPress = (id: string) => router.push(`/properties/${id}`);
+
+  useEffect(() => {
+    refetch({
+      filter: params.filter!,
+      query: params.query!,
+      limit: 6,
+    });
+  }, [params.filter, params.query, refetch]);
 
   return (
     <SafeAreaView className='bg-white h-full'>
@@ -16,9 +51,16 @@ export default function Index() {
         onPress={seed}
       /> */}
       <FlatList
-        data={[1, 2, 3, 4]}
-        renderItem={({ item }) => <Card />}
-        keyExtractor={(item) => item.toString()}
+        data={properties}
+        renderItem={({ item }) => {
+          return (
+            <Card
+              item={item as unknown as Property}
+              onPress={() => handleCardPress(item.$id)}
+            />
+          );
+        }}
+        keyExtractor={(item) => item.$id}
         numColumns={2}
         contentContainerClassName='pb-32'
         columnWrapperClassName='flex gap-5 px-5'
@@ -58,9 +100,14 @@ export default function Index() {
                 </TouchableOpacity>
               </View>
               <FlatList
-                data={[1, 2, 3]}
-                renderItem={({ item }) => <FeaturedCard />}
-                keyExtractor={(item) => item.toString()}
+                data={featuredProperties}
+                renderItem={({ item }) => (
+                  <FeaturedCard
+                    item={item as unknown as Property}
+                    onPress={() => handleCardPress(item.$id)}
+                  />
+                )}
+                keyExtractor={(item) => item.$id}
                 horizontal
                 bounces={false}
                 showsHorizontalScrollIndicator={false}

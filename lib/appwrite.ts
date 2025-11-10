@@ -5,8 +5,10 @@ import {
   Avatars,
   Client,
   OAuthProvider,
+  Query,
   TablesDB,
 } from "react-native-appwrite";
+import { Property } from "./models";
 
 //reference: https://appwrite.io/docs/products/auth/oauth2
 
@@ -101,5 +103,63 @@ export const getCurrentUser = async () => {
   } catch (error) {
     console.error(error);
     return null;
+  }
+};
+
+export const getFeaturedProperties = async () => {
+  try {
+    const result = await tables.listRows<Property>({
+      databaseId: config.databaseId!,
+      tableId: config.propertiesTableId!,
+      queries: [Query.orderAsc("$createdAt"), Query.limit(5)],
+    });
+
+    return result.rows;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
+export const getProperties = async ({
+  filter,
+  query,
+  limit,
+}: {
+  filter: string;
+  query: string;
+  limit?: number;
+}) => {
+  try {
+    const buildQuery = [Query.orderDesc("$createdAt")];
+
+    if (filter && filter !== "All") {
+      buildQuery.push(Query.equal("type", filter));
+    }
+
+    if (query) {
+      buildQuery.push(
+        Query.or([
+          Query.search("name", query),
+          Query.search("address", query),
+          Query.search("type", query),
+        ])
+      );
+    }
+
+    if (limit) {
+      buildQuery.push(Query.limit(limit));
+    }
+
+    const result = await tables.listRows<Property>({
+      databaseId: config.databaseId!,
+      tableId: config.propertiesTableId!,
+      queries: buildQuery,
+    });
+
+    return result.rows;
+  } catch (error) {
+    console.log(error);
+    return [];
   }
 };
