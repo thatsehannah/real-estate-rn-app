@@ -1,5 +1,6 @@
 import { Card, FeaturedCard } from "@/components/Cards";
 import Filters from "@/components/Filters";
+import NoResults from "@/components/NoResults";
 import Search from "@/components/Search";
 import icons from "@/constants/icons";
 import { getFeaturedProperties, getProperties } from "@/lib/appwrite";
@@ -65,6 +66,7 @@ export default function Index() {
         contentContainerClassName='pb-32'
         columnWrapperClassName='flex gap-5 px-5'
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={<NoResults />}
         ListHeaderComponent={() => (
           <View className='px-5'>
             <View className='flex flex-row items-center justify-between mt-5'>
@@ -99,20 +101,24 @@ export default function Index() {
                   </Text>
                 </TouchableOpacity>
               </View>
-              <FlatList
-                data={featuredProperties}
-                renderItem={({ item }) => (
-                  <FeaturedCard
-                    item={item as unknown as Property}
-                    onPress={() => handleCardPress(item.$id)}
-                  />
-                )}
-                keyExtractor={(item) => item.$id}
-                horizontal
-                bounces={false}
-                showsHorizontalScrollIndicator={false}
-                contentContainerClassName='flex gap-5 mt-5'
-              />
+              {!featuredProperties || featuredProperties.length === 0 ? (
+                <NoResults />
+              ) : (
+                <FlatList
+                  data={featuredProperties}
+                  renderItem={({ item }) => (
+                    <FeaturedCard
+                      item={item as unknown as Property}
+                      onPress={() => handleCardPress(item.$id)}
+                    />
+                  )}
+                  keyExtractor={(item) => item.$id}
+                  horizontal
+                  bounces={false}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerClassName='flex gap-5 mt-5'
+                />
+              )}
             </View>
 
             <View className='my-5'>
