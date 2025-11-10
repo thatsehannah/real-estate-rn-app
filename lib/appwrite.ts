@@ -2,15 +2,15 @@ import { createURL } from "expo-linking";
 import { openAuthSessionAsync } from "expo-web-browser";
 import { Account, Avatars, Client, OAuthProvider } from "react-native-appwrite";
 
+//reference: https://appwrite.io/docs/products/auth/oauth2
+
 export const config = {
   platform: "com.thatsehannah.restate",
   endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT,
   projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID,
 };
 
-export const client = new Client();
-
-client
+export const client = new Client()
   .setEndpoint(config.endpoint!)
   .setProject(config.projectId!)
   .setPlatform(config.platform!);
@@ -50,7 +50,7 @@ export const login = async () => {
     if (!secret || !userId)
       throw new Error("Failed to login - secret or userId doesn't exist");
 
-    const session = await account.createSession(userId, secret);
+    const session = await account.createSession({ userId, secret });
 
     if (!session) throw new Error("Failed to create a session");
 
@@ -61,11 +61,9 @@ export const login = async () => {
   }
 };
 
-export const logout = async () => {
+export const logout = async (userId: string) => {
   try {
-    await account.deleteSession({
-      sessionId: "current",
-    });
+    await account.deleteSessions();
 
     return true;
   } catch (error) {
@@ -79,10 +77,9 @@ export const getCurrentUser = async () => {
     const response = await account.get();
 
     if (response.$id) {
+      console.log();
       //form a new user avatar (generate an image using the user's initials)
-      const userAvatar = avatar.getInitials({
-        name: response.name,
-      });
+      const userAvatar = await avatar.getInitialsURL(response.name);
 
       return {
         ...response,
